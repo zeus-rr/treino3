@@ -81,7 +81,7 @@
                     <input type="text" id="profNameInput" class="w-full bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl border-none outline-none focus:ring-2 focus:ring-pink-hot font-bold mt-1">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold uppercase opacity-60 ml-2">WhatsApp (com DDD)</label>
+                    <label class="text-[10px] font-bold uppercase opacity-60 ml-2">WhatsApp (apenas números)</label>
                     <input type="text" id="profPhoneInput" placeholder="55159..." class="w-full bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl border-none outline-none focus:ring-2 focus:ring-pink-hot font-bold mt-1">
                 </div>
                 <div>
@@ -174,7 +174,6 @@
     </footer>
 
     <script>
-        // --- BIBLIOTECA E DADOS ---
         const exerciseLibrary = {
             "Peito (Variantes)": ["Supino Reto Barra", "Supino Reto Halteres", "Supino Inclinado Barra", "Supino Inclinado Halteres", "Supino Declinado", "Crucifixo Reto", "Crucifixo Inclinado", "Peck Deck (Voador)", "Crossover Cabo Alto", "Crossover Cabo Médio", "Crossover Cabo Baixo", "Flexão de Braços Solo", "Supino Máquina Convergente", "Pullover Halter", "Dips (Paralelas) Peito"],
             "Costas (Dorsal/Lombar)": ["Puxada Frente Aberta", "Puxada Triângulo", "Puxada Supinada", "Remada Curvada Barra", "Remada Curvada Halteres", "Remada Unilateral (Serrote)", "Remada Baixa Polia", "Remada Cavalinho", "Pulldown Corda", "Barra Fixa Aberta", "Levantamento Terra Clássico", "Extensão Lombar", "Face Pull"],
@@ -201,7 +200,6 @@
             profPhoto: ""
         };
 
-        // --- INICIALIZAÇÃO ---
         function init() {
             const savedTheme = localStorage.getItem('theme_jaque') || 'dark';
             document.documentElement.className = savedTheme;
@@ -232,10 +230,11 @@
             render();
         }
 
-        // --- GESTÃO DE FOTOS ---
         function handlePhotoUpload(input, targetKey) {
             const file = input.files[0];
             if (file) {
+                // Se a foto for muito grande, ela ainda pode quebrar o localStorage. 
+                // Idealmente, usar fotos pequenas.
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const base64Image = e.target.result;
@@ -254,7 +253,6 @@
             }
         }
 
-        // --- CONFIGURAÇÕES ADMIN ---
         function applyAdminSettings() {
             document.getElementById('brandName').innerText = `PERSONAL _ ${adminSettings.profName.toUpperCase()}`;
             document.getElementById('profNameInput').value = adminSettings.profName;
@@ -277,14 +275,13 @@
 
         function saveAdminData() {
             adminSettings.profName = document.getElementById('profNameInput').value || "JAQUE";
-            adminSettings.profPhone = document.getElementById('profPhoneInput').value || "55";
+            adminSettings.profPhone = document.getElementById('profPhoneInput').value.replace(/\D/g,'') || "55";
             adminSettings.profColor = document.getElementById('profColorInput').value;
             localStorage.setItem('jaque_admin_v3', JSON.stringify(adminSettings));
             applyAdminSettings();
             toggleAdmin();
         }
 
-        // --- LOGICA DO TREINO ---
         function renderLibrary() {
             const container = document.getElementById('accordionLib');
             container.innerHTML = "";
@@ -375,7 +372,6 @@
             });
         }
 
-        // --- AUXILIARES E EVENTOS ---
         function toggleAdmin() { document.getElementById('adminModal').classList.toggle('active'); }
         function toggleCat(btn) { btn.nextElementSibling.classList.toggle('active'); }
         function toggleTheme() { document.documentElement.classList.toggle('dark'); localStorage.setItem('theme_jaque', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); }
@@ -394,24 +390,37 @@
             if(workoutData.days[toDay]) { workoutData.days[toDay] = JSON.parse(JSON.stringify(workoutData.days[fromDay])); save(); render(); }
         }
 
-        // --- GERAÇÃO DE LINK ---
+        // --- GERAÇÃO DE LINK CORRIGIDA ---
         function getGeneratedURL() {
-            const jsonStr = JSON.stringify(workoutData);
+            // Criamos uma cópia para não mexer no original
+            const dataToShare = JSON.parse(JSON.stringify(workoutData));
+            
+            // REMOVEMOS A FOTO DO ALUNO DO LINK (ela é muito pesada para URLs de WhatsApp)
+            // Se quiser que o aluno tenha foto, ele mesmo pode subir no celular dele.
+            dataToShare.studentPhoto = ""; 
+            
+            const jsonStr = JSON.stringify(dataToShare);
             const encoded = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
             const colorClean = adminSettings.profColor.replace('#', '');
+            
+            // Geramos a URL final
             return `${window.location.origin}${window.location.pathname}?aluno=${encoded}&p=${encodeURIComponent(adminSettings.profName)}&c=${colorClean}`;
         }
 
         function generateLink() {
-            navigator.clipboard.writeText(getGeneratedURL()).then(() => {
+            const url = getGeneratedURL();
+            navigator.clipboard.writeText(url).then(() => {
                 const btn = document.getElementById('btnCopy');
                 btn.innerText = "COPIADO! ✅";
                 setTimeout(() => btn.innerText = "Copiar Link 🔗", 2000);
+            }).catch(err => {
+                alert("Erro ao copiar. Tente usar um navegador moderno.");
             });
         }
 
         function sendWhatsApp() {
-            const text = encodeURIComponent(`Olá ${workoutData.student || 'Aluno'}, seu treino atualizado está pronto: ${getGeneratedURL()}`);
+            const url = getGeneratedURL();
+            const text = encodeURIComponent(`Olá ${workoutData.student || 'Aluno'}, seu treino atualizado está pronto: ${url}`);
             window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
         }
 
@@ -434,12 +443,10 @@
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('#accordionLib .category-content').forEach(cat => {
                 let hasMatch = false;
-                cat.querySelectorAll('.ex-item, div').forEach(el => {
-                    if(el.classList.contains('group')) {
-                        const match = el.innerText.toLowerCase().includes(term);
-                        el.style.display = match ? 'flex' : 'none';
-                        if(match) hasMatch = true;
-                    }
+                cat.querySelectorAll('div.group').forEach(el => {
+                    const match = el.innerText.toLowerCase().includes(term);
+                    el.style.display = match ? 'flex' : 'none';
+                    if(match) hasMatch = true;
                 });
                 if(term.length > 1 && hasMatch) cat.classList.add('active');
                 else if(term.length <= 1) cat.classList.remove('active');
