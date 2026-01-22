@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="pt-BR" class="dark">
 <head>
+    <link rel="icon" href="https://zeus-rr.github.io/treino/icon.png">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>SISTEMA DE TREINO PREMIUM</title>
-    <link rel="icon" href="https://zeus-rr.github.io/treino/icon.png">
+    <title id="pageTitle">SISTEMA DE TREINO PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,8 +12,7 @@
             theme: { 
                 extend: { 
                     colors: { 
-                        'primary': 'var(--primary-color)', 
-                        'pink-hot': '#FF1493',
+                        'pink-hot': 'var(--main-color, #FF1493)', 
                         'bg-dark': '#0b0f1a' 
                     } 
                 } 
@@ -21,79 +20,84 @@
         }
     </script>
     <style>
-        :root { --primary-color: #FF1493; --primary-rgb: 255, 20, 147; }
-        body { transition: background-color 0.3s ease; }
-        .is-conjugated { margin-bottom: -1rem !important; border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important; border-bottom: 2px dashed var(--primary-color) !important; position: relative; z-index: 10; }
+        :root { --main-color: #FF1493; }
+        .is-conjugated { margin-bottom: -1rem !important; border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important; border-bottom: 2px dashed var(--main-color) !important; z-index: 10; }
         .is-conjugated + .workout-item { border-top-left-radius: 0 !important; border-top-right-radius: 0 !important; }
         .is-student-mode .admin-ui, .is-student-mode .edit-btn, .is-student-mode .drag-handle { display: none !important; }
-        .is-student-mode main { grid-template-columns: 1fr !important; max-width: 800px; }
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 10px; }
+        
+        .serie-dot { width: 28px; height: 28px; border: 2px solid var(--main-color); border-radius: 50%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+        .serie-dot.checked { background-color: var(--main-color); color: white; transform: scale(1.1); box-shadow: 0 0 10px var(--main-color); }
+        
+        .progress-bar-container { position: fixed; top: 0; left: 0; width: 100%; height: 5px; background: rgba(255,20,147,0.1); z-index: 1000; }
+        #progressFill { height: 100%; background: var(--main-color); width: 0%; transition: width 0.3s ease; }
+
+        .pink-bold { color: var(--main-color) !important; font-weight: 900 !important; }
+        .btn-whatsapp-float { position: fixed; bottom: 20px; right: 20px; background-color: #25d366; color: white; padding: 10px 20px; border-radius: 50px; font-weight: 800; text-transform: uppercase; font-size: 11px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 10px; z-index: 1000; border: 2px solid white; text-decoration: none; }
+        .btn-whatsapp-float img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+        
         .category-content { display: none; }
-        .category-content.active { display: block; animation: slideDown 0.3s ease-out; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-        .pink-bold { color: var(--primary-color) !important; font-weight: 900 !important; }
-        .btn-whatsapp-float { position: fixed; bottom: 20px; right: 20px; background-color: #25d366; color: white; padding: 12px 20px; border-radius: 50px; font-weight: 900; text-transform: uppercase; font-size: 11px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; z-index: 1000; }
-        #adminModal { display: none; }
-        #adminModal.active { display: flex; }
-        .profile-upload { position: relative; width: 80px; height: 80px; border-radius: 20px; overflow: hidden; background: #f1f5f9; cursor: pointer; border: 2px dashed #cbd5e1; }
-        .profile-upload img { width: 100%; height: 100%; object-fit: cover; }
-        @media print { .no-print { display: none !important; } }
+        .category-content.active { display: block; }
+        .drag-handle { cursor: grab; padding-right: 10px; color: #64748b; font-size: 1.2rem; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--main-color); border-radius: 10px; }
+
+        /* Estilo da seleção temporária na biblioteca */
+        .selected-flash { background-color: #22c55e !important; color: white !important; transform: scale(0.95); transition: all 0.2s; }
+
+        .student-header-pdf { display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem; text-align: center; }
+        .student-photo-large { width: 130px; height: 130px; border-radius: 50%; border: 4px solid var(--main-color); object-fit: cover; margin-bottom: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
+            .admin-ui { display: none !important; }
+        }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-[#0b0f1a] text-slate-800 dark:text-slate-100 font-sans antialiased flex flex-col min-h-screen">
+<body class="bg-slate-100 dark:bg-[#0b0f1a] text-slate-800 dark:text-slate-100 font-sans min-h-screen">
 
-    <a id="waLink" href="#" target="_blank" class="btn-whatsapp-float no-print">
-        <span>Falar com o Professor</span> 💬
+    <div id="progressContainer" class="progress-bar-container hidden"><div id="progressFill"></div></div>
+
+    <a id="waFloat" href="#" target="_blank" class="btn-whatsapp-float no-print">
+        <img id="waPhoto" src="https://zeus-rr.github.io/treino/icon.png">
+        <span id="waText">Dúvida Professor</span>
     </a>
-
-    <div id="adminModal" class="fixed inset-0 z-[110] bg-slate-900/95 backdrop-blur-md p-4 items-center justify-center">
-        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800">
-            <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                <h2 class="text-xl font-black uppercase pink-bold">Configurações</h2>
-                <button onclick="toggleAdmin()" class="text-slate-400 hover:text-red-500 font-bold text-2xl">&times;</button>
-            </div>
-            <div class="p-8 space-y-4">
-                <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl">
-                    <div class="profile-upload" onclick="document.getElementById('profPhotoInput').click()">
-                        <img id="profPhotoPreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-                        <input type="file" id="profPhotoInput" hidden accept="image/*" onchange="compressAndUpload(this, 'profPhoto')">
-                    </div>
-                    <p class="text-[10px] font-bold uppercase opacity-60">Sua Foto de Perfil</p>
-                </div>
-                <input type="text" id="profNameInput" placeholder="Nome do Professor" class="w-full bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl outline-none font-bold">
-                <input type="text" id="profPhoneInput" placeholder="WhatsApp (55...)" class="w-full bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl outline-none font-bold">
-                <input type="color" id="profColorInput" class="w-full h-12 rounded-xl mt-1 cursor-pointer bg-transparent border-none">
-                <button onclick="saveAdminData()" class="w-full bg-pink-hot text-white py-4 rounded-2xl font-black uppercase text-sm shadow-lg">Salvar Configurações</button>
-            </div>
-        </div>
-    </div>
 
     <header class="p-4 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <img id="profHeaderPhoto" src="" class="w-10 h-10 rounded-full object-cover border-2 border-primary hidden sm:block">
-                <h1 id="brandName" class="text-lg italic uppercase tracking-tighter pink-bold cursor-pointer" onclick="toggleAdmin()">PERSONAL</h1>
+                <img id="displayImgProf" src="https://zeus-rr.github.io/treino/icon.png" class="w-10 h-10 rounded-full border-2 border-pink-hot object-cover">
+                <h1 id="brandName" class="text-xl italic uppercase tracking-tighter pink-bold">SISTEMA DE TREINO</h1>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="toggleAdmin()" class="admin-ui bg-slate-100 dark:bg-slate-800 p-2.5 rounded-xl">⚙️</button>
-                <button onclick="toggleTheme()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border">🌙</button>
+                <div id="saveStatus" class="text-[9px] font-bold bg-amber-500/20 text-amber-500 px-2 py-1 rounded admin-ui uppercase">Pendente</div>
+                <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border no-print">🌓</button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
-        <aside class="lg:col-span-4 space-y-6 admin-ui">
-            <div class="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-xl border border-slate-200 dark:border-slate-800">
-                <h3 class="text-xs font-black uppercase mb-4 text-pink-hot">Dados do Aluno</h3>
-                <div class="flex justify-center mb-4">
-                    <div class="profile-upload" onclick="document.getElementById('studentPhotoInput').click()">
-                        <img id="studentPhotoPreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-                        <input type="file" id="studentPhotoInput" hidden accept="image/*" onchange="compressAndUpload(this, 'studentPhoto')">
+    <main class="max-w-[1600px] mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+        <aside class="lg:col-span-4 space-y-4 admin-ui">
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-xl border border-pink-hot/20">
+                <h3 class="text-[10px] font-black uppercase mb-4 text-pink-hot tracking-widest">Configurações do Professor</h3>
+                <div class="space-y-3">
+                    <input type="text" id="confName" oninput="updateConfigs(); markUnsaved()" placeholder="Nome do Professor" class="w-full bg-slate-100 dark:bg-slate-800 p-2 rounded-lg text-sm font-bold outline-none border-b-2 border-pink-hot">
+                    <input type="text" id="confPhone" oninput="updateConfigs(); markUnsaved()" placeholder="WhatsApp (55...)" class="w-full bg-slate-100 dark:bg-slate-800 p-2 rounded-lg text-sm font-bold outline-none">
+                    <input type="url" id="urlProf" oninput="handleURLImage(this, 'prof'); markUnsaved()" placeholder="URL Foto Professor" class="w-full bg-slate-100 dark:bg-slate-800 p-2 rounded-lg text-[10px] font-bold outline-none">
+                    
+                    <div class="flex items-center justify-between p-2 bg-slate-100 dark:bg-slate-800 rounded-lg mt-2">
+                        <label class="text-[10px] font-black uppercase opacity-60">Cor do Tema</label>
+                        <input type="color" id="themeColor" oninput="updateConfigs(); markUnsaved()" class="h-8 w-12 bg-transparent cursor-pointer">
                     </div>
                 </div>
-                <input type="text" id="studentName" oninput="updateHeader()" placeholder="Nome do Aluno" class="w-full bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl outline-none font-bold mb-3">
-                <select id="daySelector" class="w-full bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl outline-none font-bold text-sm">
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800">
+                <h3 class="text-[10px] font-black uppercase mb-4 text-pink-hot tracking-widest">Dados do Aluno</h3>
+                <input type="text" id="studentName" oninput="updateHeader(); markUnsaved()" placeholder="Nome do Aluno" class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-xl mb-3 font-bold outline-none">
+                <input type="url" id="urlStudent" oninput="handleURLImage(this, 'student'); markUnsaved()" placeholder="URL Foto do Aluno" class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-xl mb-3 text-[10px] font-bold outline-none border-b-2 border-pink-hot">
+                
+                <select id="daySelector" class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-xl font-bold text-sm outline-none">
                     <option value="segunda">Segunda-feira</option>
                     <option value="terca">Terça-feira</option>
                     <option value="quarta">Quarta-feira</option>
@@ -103,197 +107,285 @@
                 </select>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-xl border border-slate-200 dark:border-slate-800">
-                <input type="text" id="searchEx" placeholder="Buscar exercício..." class="w-full bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl mb-4 text-sm outline-none">
-                <div id="accordionLib" class="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar"></div>
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800">
+                <h3 class="text-xs font-black uppercase mb-4 text-pink-hot tracking-widest">Biblioteca de Exercícios</h3>
+                <input type="text" id="searchEx" oninput="filterLibrary()" placeholder="Buscar exercício..." class="w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-xl mb-4 text-sm outline-none">
+                <div id="accordionLib" class="space-y-2 max-h-[400px] overflow-y-auto custom-scrollbar pr-2"></div>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-xl border border-slate-200 dark:border-slate-800">
+                <h3 class="text-[10px] font-black uppercase mb-4 text-pink-hot tracking-widest">Histórico de Alunos</h3>
+                <button onclick="saveToHistory()" class="w-full bg-pink-hot text-white text-[10px] font-black p-3 rounded-xl uppercase mb-4 shadow-lg">💾 Salvar Treino Atual</button>
+                <div id="historyList" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar"></div>
             </div>
         </aside>
 
         <section class="lg:col-span-8 space-y-6">
-            <div id="studentHeaderView" class="hidden flex-col items-center text-center p-8 bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-sm mb-4">
-                <img id="studentViewPhoto" src="" class="w-28 h-28 rounded-[2.5rem] object-cover mb-4 border-4 border-primary shadow-2xl">
-                <h2 id="studentViewName" class="text-3xl font-black pink-bold uppercase italic">NOME DO ALUNO</h2>
-            </div>
-
             <div class="flex flex-wrap gap-2 no-print">
-                <button onclick="sendWhatsApp()" class="bg-green-600 text-white px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase shadow-lg admin-ui">Enviar p/ Aluno 📱</button>
-                <button id="btnCopy" onclick="generateLink()" class="bg-pink-hot text-white px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase shadow-lg admin-ui">Copiar Link 🔗</button>
-                <button onclick="window.print()" class="bg-slate-800 text-white px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase shadow-lg">PDF 📄</button>
-                <button onclick="clearWorkout()" class="admin-ui bg-red-500/10 text-red-500 px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase ml-auto">Reset</button>
+                <button id="btnWA" onclick="checkAndExecute(sendWhatsApp)" class="bg-green-600 text-white px-5 py-3 rounded-full font-black text-[10px] uppercase shadow-lg admin-ui">Enviar WhatsApp 📱</button>
+                <button id="btnLink" onclick="checkAndExecute(generateLink)" class="bg-pink-hot text-white px-5 py-3 rounded-full font-black text-[10px] uppercase shadow-lg admin-ui">Copiar Link 🔗</button>
+                <button onclick="clearCurrentWork()" class="bg-red-500/10 text-red-500 px-5 py-3 rounded-full font-black text-[10px] uppercase admin-ui border border-red-500/20">Limpar Tela</button>
+                <button onclick="window.print()" class="bg-slate-700 text-white px-5 py-3 rounded-full font-black text-[10px] uppercase shadow-lg">Gerar PDF 📄</button>
             </div>
 
-            <div id="weekDisplay" class="space-y-8"></div>
+            <div id="studentHeaderTop" class="hidden student-header-pdf"></div>
+            <div id="weekDisplay" class="space-y-10"></div>
+
+            <div id="finishArea" class="hidden text-center p-10 bg-white dark:bg-slate-900 rounded-[2rem] border-2 border-dashed border-pink-hot">
+                <h2 class="text-2xl font-black text-pink-hot">TREINO CONCLUÍDO! 🔥</h2>
+                <button onclick="location.reload()" class="mt-4 bg-pink-hot text-white px-6 py-2 rounded-full font-bold text-xs uppercase">Reiniciar</button>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800">
+                <h3 class="text-xs font-black uppercase mb-4 text-pink-hot tracking-widest">Observações Gerais</h3>
+                <textarea id="generalNotes" oninput="saveDraft(); markUnsaved()" class="w-full bg-slate-100 dark:bg-slate-800 p-4 rounded-xl text-sm outline-none min-h-[100px]" placeholder="Dicas de execução, cardio ou dieta..."></textarea>
+            </div>
         </section>
     </main>
 
     <script>
-        const exerciseLibrary = {
-            "Peito (Variantes)": ["Supino Reto Barra", "Supino Reto Halteres", "Supino Inclinado Barra", "Supino Inclinado Halteres", "Supino Declinado", "Crucifixo Reto", "Crucifixo Inclinado", "Peck Deck (Voador)", "Crossover Cabo Alto", "Crossover Cabo Médio", "Crossover Cabo Baixo", "Flexão de Braços Solo", "Supino Máquina Convergente", "Pullover Halter", "Dips (Paralelas) Peito"],
-            "Costas (Dorsal/Lombar)": ["Puxada Frente Aberta", "Puxada Triângulo", "Puxada Supinada", "Remada Curvada Barra", "Remada Curvada Halteres", "Remada Unilateral (Serrote)", "Remada Baixa Polia", "Remada Cavalinho", "Pulldown Corda", "Barra Fixa Aberta", "Levantamento Terra Clássico", "Extensão Lombar", "Face Pull"],
-            "Pernas (Quadríceps)": ["Agachamento Livre Barra", "Agachamento Hack", "Leg Press 45º", "Leg Press Horizontal", "Cadeira Extensora", "Agachamento Búlgaro", "Afundo com Halteres", "Passada (Walking Lunges)", "Agachamento Sumô", "Sissy Squat"],
-            "Pernas (Posterior/Glúteo)": ["Stiff Barra", "Stiff Halteres", "Mesa Flexora", "Cadeira Flexora", "Elevação Pélvica Barra", "Cadeira Abdutora", "Cadeira Adutora", "Glúteo no Cabo (Coice)", "Levantamento Terra Romeno"],
-            "Ombros (Deltoides)": ["Desenvolvimento Militar", "Desenvolvimento Halteres", "Elevação Lateral Halteres", "Elevação Lateral Cabo", "Elevação Frontal", "Crucifixo Inverso", "Encolhimento de Ombros"],
-            "Braços (Bíceps)": ["Rosca Direta Barra W", "Rosca Alternada", "Rosca Martelo", "Rosca Scott", "Rosca Concentrada", "Rosca Inclinada 45º", "Rosca 21", "Rosca Cross Baixo", "Rosca Inversa"],
-            "Braços (Tríceps)": ["Tríceps Pulley V", "Tríceps Corda", "Tríceps Testa", "Tríceps Francês Halter", "Mergulho no Banco", "Dips (Paralelas) Tríceps", "Tríceps Coice", "Supino Pegada Fechada"],
-            "Panturrilha / Core": ["Gêmeos em Pé", "Gêmeos Sentado", "Abdominal Supra", "Abdominal Infra", "Prancha Isométrica", "Russian Twist", "Abdominal Roda", "Vácuo Abdominal"],
-            "Cárdio e Funcional": ["Corrida Esteira", "Bicicleta", "Corda Naval", "Elíptico", "Pular Corda", "Burpees", "Swing Kettlebell", "Thruster"]
+             const exerciseLibrary = {
+            "Peito": ["Supino Reto Barra", "Supino Reto Halteres", "Supino Inclinado Barra", "Supino Inclinado Halteres", "Supino Declinado", "Crucifixo Reto", "Crucifixo Inclinado", "Peck Deck (Voador)", "Crossover Cabo Alto", "Crossover Cabo Médio", "Crossover Cabo Baixo", "Flexão de Braços Solo", "Supino Máquina", "Pullover Halter", "Dips (Paralelas)"],
+            "Costas": ["Puxada Frente Aberta", "Puxada Triângulo", "Puxada Supinada", "Remada Curvada Barra", "Remada Unilateral (Serrote)", "Remada Baixa Polia", "Remada Cavalinho", "Pulldown Corda", "Barra Fixa", "Levantamento Terra", "Extensão Lombar", "Face Pull"],
+            "Quadríceps": ["Agachamento Livre", "Agachamento Hack", "Leg Press 45º", "Leg Press Horizontal", "Cadeira Extensora", "Agachamento Búlgaro", "Afundo", "Passada", "Agachamento Sumô", "Sissy Squat"],
+            "Posterior/Glúteo": ["Stiff", "Mesa Flexora", "Cadeira Flexora", "Elevação Pélvica", "Cadeira Abdutora", "Cadeira Adutora", "Glúteo no Cabo (Coice)", "RDL"],
+            "Ombros": ["Desenvolvimento Militar", "Desenvolvimento Halteres", "Desenvolvimento Arnold", "Elevação Lateral", "Elevação Lateral Cabo", "Elevação Frontal", "Crucifixo Inverso"],
+            "Bíceps": ["Rosca Direta Barra W", "Rosca Alternada", "Rosca Martelo", "Rosca Scott", "Rosca Concentrada", "Rosca Inclinada 45º", "Rosca Cross Baixo", "Rosca Inversa"],
+            "Tríceps": ["Tríceps Pulley V", "Tríceps Corda", "Tríceps Testa", "Tríceps Francês", "Mergulho Banco", "Dips Tríceps", "Tríceps Coice", "Supino Fechado"],
+            "Panturrilha/Core": ["Gêmeos em Pé", "Gêmeos Sentado", "Abdominal Supra", "Abdominal Infra", "Prancha Isométrica", "Abdominal Roda", "Vácuo"],
+            "Cárdio": ["Corrida Esteira", "Bicicleta", "Corda Naval", "Elíptico", "Pular Corda", "Burpees", "Polichinelos"]
         };
 
-        let workoutData = { student: "", studentPhoto: "", days: { segunda: [], terca: [], quarta: [], quinta: [], sexta: [], sabado: [] } };
-        let adminSettings = { profName: "PERSONAL", profPhone: "55", profColor: "#FF1493", profPhoto: "" };
+        let workoutData = { 
+            student: "", photoStudent: "", generalNotes: "", photoProf: "https://zeus-rr.github.io/treino/icon.png",
+            profName: "PERSONAL", profPhone: "", themeColor: "#FF1493",
+            days: { segunda: [], terca: [], quarta: [], quinta: [], sexta: [], sabado: [] } 
+        };
+
+        let isSaved = true;
 
         function init() {
-            const savedAdmin = localStorage.getItem('jaque_admin_v5');
-            if(savedAdmin) adminSettings = JSON.parse(savedAdmin);
-            
             renderLibrary();
             const urlParams = new URLSearchParams(window.location.search);
             const alunoData = urlParams.get('aluno');
-            
             if (alunoData) {
                 try {
-                    workoutData = JSON.parse(decodeURIComponent(escape(atob(alunoData))));
+                    const decoded = decodeURIComponent(atob(alunoData).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                    workoutData = JSON.parse(decoded);
                     document.body.classList.add('is-student-mode');
-                    document.getElementById('studentHeaderView').classList.replace('hidden', 'flex');
-                    document.getElementById('studentViewPhoto').src = workoutData.studentPhoto || "";
-                    document.getElementById('studentViewName').innerText = workoutData.student;
-                } catch(e) { load(); }
-            } else { load(); }
-            
-            applyAdmin();
+                    document.getElementById('progressContainer').classList.remove('hidden');
+                } catch(e) { loadDraft(); }
+            } else { loadDraft(); renderHistory(); }
+            applyConfigs();
             render();
         }
 
-        function compressAndUpload(input, targetKey) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const size = 60; // 60x60 para manter link curto
-                    canvas.width = size; canvas.height = size;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, size, size);
-                    const compressed = canvas.toDataURL('image/jpeg', 0.1);
-                    if (targetKey === 'profPhoto') {
-                        adminSettings.profPhoto = compressed;
-                        document.getElementById('profPhotoPreview').src = compressed;
-                    } else {
-                        workoutData.studentPhoto = compressed;
-                        document.getElementById('studentPhotoPreview').src = compressed;
-                        save();
-                    }
-                    applyAdmin(); render();
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+        function applyConfigs() {
+            document.documentElement.style.setProperty('--main-color', workoutData.themeColor);
+            document.getElementById('brandName').innerText = workoutData.profName;
+            document.getElementById('confName').value = workoutData.profName;
+            document.getElementById('confPhone').value = workoutData.profPhone;
+            document.getElementById('themeColor').value = workoutData.themeColor;
+            if(workoutData.photoProf) {
+                document.getElementById('displayImgProf').src = workoutData.photoProf;
+                document.getElementById('waPhoto').src = workoutData.photoProf;
+            }
+            const firstName = workoutData.profName.split(' ')[0];
+            document.getElementById('waText').innerText = `Dúvida com ${firstName}`;
+            document.getElementById('waFloat').href = `https://api.whatsapp.com/send?phone=${workoutData.profPhone}&text=Olá ${firstName}, preciso de ajuda!`;
         }
 
-        function renderLibrary() {
-            const container = document.getElementById('accordionLib');
-            Object.keys(exerciseLibrary).forEach(cat => {
-                const div = document.createElement('div');
-                div.className = "rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900";
-                div.innerHTML = `
-                    <button onclick="this.nextElementSibling.classList.toggle('active')" class="w-full p-4 text-left font-black text-[10px] uppercase flex justify-between">
-                        ${cat} <span>▼</span>
-                    </button>
-                    <div class="category-content p-2 bg-slate-50 dark:bg-slate-800/20 space-y-1">
-                        ${exerciseLibrary[cat].map(ex => `<div onclick="addEx('${ex}')" class="p-2 text-xs font-bold hover:text-pink-hot cursor-pointer border-b border-black/5 dark:border-white/5">${ex}</div>`).join('')}
-                    </div>`;
-                container.appendChild(div);
-            });
+        function updateConfigs() {
+            workoutData.profName = document.getElementById('confName').value;
+            workoutData.profPhone = document.getElementById('confPhone').value;
+            workoutData.themeColor = document.getElementById('themeColor').value;
+            applyConfigs(); saveDraft();
         }
 
-        function addEx(name) {
-            const day = document.getElementById('daySelector').value;
-            workoutData.days[day].push({ n: name, r: "3x12", w: "", obs: "", bi: false });
-            save(); render();
+        async function getShortUrl(longUrl) {
+            try {
+                const response = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
+                const data = await response.json();
+                return data.shorturl || longUrl;
+            } catch (e) { return longUrl; }
+        }
+
+        async function generateLink() {
+            const btn = document.getElementById('btnLink');
+            btn.innerText = "ENCURTANDO...";
+            const shortUrl = await getShortUrl(getFullURL());
+            navigator.clipboard.writeText(shortUrl);
+            btn.innerText = "COPIADO!";
+            setTimeout(() => btn.innerText = "COPIAR LINK 🔗", 2000);
+            markSaved();
+        }
+
+        async function sendWhatsApp() {
+            const btn = document.getElementById('btnWA');
+            btn.innerText = "GERANDO...";
+            const shortUrl = await getShortUrl(getFullURL());
+            btn.innerText = "ENVIAR WHATSAPP 📱";
+            const msg = encodeURIComponent(`Olá ${workoutData.student}, aqui está seu treino atualizado: ${shortUrl}`);
+            window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+            markSaved();
+        }
+
+        function handleURLImage(input, type) { 
+            if(type==='prof') workoutData.photoProf = input.value; 
+            if(type==='student') workoutData.photoStudent = input.value;
+            applyConfigs(); render(); markUnsaved();
+        }
+
+        function updateHeader() { 
+            workoutData.student = document.getElementById('studentName').value; 
+            render(); saveDraft(); 
         }
 
         function render() {
             const container = document.getElementById('weekDisplay');
+            const headerTop = document.getElementById('studentHeaderTop');
             container.innerHTML = "";
             const isStudent = document.body.classList.contains('is-student-mode');
             
-            if(!isStudent) {
-                document.getElementById('studentName').value = workoutData.student;
-                document.getElementById('studentPhotoPreview').src = workoutData.studentPhoto || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-            }
+            document.getElementById('studentName').value = workoutData.student || "";
+            document.getElementById('urlStudent').value = workoutData.photoStudent || "";
+            document.getElementById('generalNotes').value = workoutData.generalNotes || "";
 
-            Object.keys(workoutData.days).forEach(day => {
-                if(workoutData.days[day].length === 0) return;
-                let html = `<div class="day-section" data-day="${day}">
-                    <h2 class="pink-bold uppercase font-black mb-4 flex items-center gap-2">
-                        <span class="w-6 h-6 bg-primary text-white rounded-lg flex items-center justify-center text-[10px]">${day[0].toUpperCase()}</span>
-                        ${day}
-                    </h2>
-                    <div class="space-y-3">`;
+            if (workoutData.student) {
+                headerTop.classList.remove('hidden');
+                headerTop.innerHTML = `
+                    ${workoutData.photoStudent ? `<img src="${workoutData.photoStudent}" class="student-photo-large">` : ''}
+                    <h2 class="text-3xl font-black uppercase italic pink-bold">${workoutData.student}</h2>
+                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-[0.2em]">Plano de Treinamento Profissional</p>
+                `;
+            } else { headerTop.classList.add('hidden'); }
+
+            Object.keys(workoutData.days).forEach(dayKey => {
+                if (workoutData.days[dayKey].length === 0) return;
+                let html = `<div class="day-section" data-day="${dayKey}">
+                    <h2 class="text-xl font-black uppercase italic pink-bold mb-4 border-l-4 border-pink-hot pl-3">${dayKey}</h2>
+                    <div class="grid gap-3">`;
                 
-                workoutData.days[day].forEach((ex, i) => {
+                workoutData.days[dayKey].forEach((ex, idx) => {
+                    let numSeries = parseInt(ex.r.split('x')[0]) || 0;
+                    let checklist = "";
+                    if(isStudent && numSeries > 0) {
+                        checklist = `<div class="flex gap-2 mt-3 flex-wrap">`;
+                        for(let i=1; i<=numSeries; i++) checklist += `<div class="serie-dot" onclick="toggleCheck(this)">${i}</div>`;
+                        checklist += `</div>`;
+                    }
+
                     html += `
-                    <div class="workout-item ${ex.bi ? 'is-conjugated' : ''} bg-white dark:bg-slate-900 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-                        <div class="flex-1">
-                            <h4 class="font-black text-xs uppercase text-slate-700 dark:text-slate-200">${ex.n}</h4>
-                            <input type="text" placeholder="Observação..." value="${ex.obs || ''}" oninput="workoutData.days['${day}'][${i}].obs=this.value;save()" class="w-full bg-transparent border-b border-dashed border-slate-200 dark:border-slate-800 text-[10px] outline-none mt-1" ${isStudent ? 'disabled' : ''}>
-                            <div class="flex gap-2 mt-3 admin-ui">
-                                <button onclick="workoutData.days['${day}'][${i}].bi=!workoutData.days['${day}'][${i}].bi;save();render()" class="text-[8px] font-black px-2 py-1 rounded-lg ${ex.bi ? 'bg-pink-hot text-white' : 'bg-slate-100 dark:bg-slate-800'}">CONJUGADO</button>
-                                <button onclick="workoutData.days['${day}'].splice(${i},1);save();render()" class="text-[8px] font-black px-2 py-1 text-red-500">REMOVER</button>
+                    <div class="workout-item ${ex.bi ? 'is-conjugated' : ''} bg-white dark:bg-slate-900 p-4 rounded-[1.5rem] border border-slate-200 dark:border-slate-800 shadow-sm" data-index="${idx}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="drag-handle admin-ui">☰</div>
+                                <div>
+                                    <h4 class="font-bold text-xs uppercase">${ex.n}</h4>
+                                    <input type="text" value="${ex.obs}" oninput="workoutData.days['${dayKey}'][${idx}].obs=this.value;markUnsaved()" class="bg-transparent text-[10px] border-b border-dashed w-full outline-none" placeholder="Obs..." ${isStudent?'disabled':''}>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="text-center">
+                                    <p class="text-[8px] uppercase opacity-50 font-bold">Séries</p>
+                                    <input type="text" value="${ex.r}" oninput="workoutData.days['${dayKey}'][${idx}].r=this.value;markUnsaved()" class="w-12 bg-slate-100 dark:bg-slate-800 text-center text-[10px] p-2 rounded-lg font-bold" ${isStudent?'disabled':''}>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-[8px] uppercase opacity-50 font-bold">Carga</p>
+                                    <input type="text" value="${ex.w}" oninput="workoutData.days['${dayKey}'][${idx}].w=this.value;markUnsaved()" class="w-10 bg-slate-100 dark:bg-slate-800 text-center text-[10px] p-2 rounded-lg font-bold" ${isStudent?'disabled':''}>
+                                </div>
+                                <button onclick="removeEx('${dayKey}', ${idx})" class="admin-ui text-red-500 px-1 self-end mb-1">✕</button>
                             </div>
                         </div>
-                        <div class="flex gap-2">
-                            <input type="text" value="${ex.r}" oninput="workoutData.days['${day}'][${i}].r=this.value;save()" class="w-12 text-center bg-slate-50 dark:bg-slate-800 rounded-xl font-black text-[10px] p-2" ${isStudent ? 'disabled' : ''}>
-                            <input type="text" placeholder="Kg" value="${ex.w}" oninput="workoutData.days['${day}'][${i}].w=this.value;save()" class="w-10 text-center bg-slate-50 dark:bg-slate-800 rounded-xl font-black text-[10px] p-2" ${isStudent ? 'disabled' : ''}>
-                        </div>
+                        ${checklist}
                     </div>`;
                 });
                 container.innerHTML += html + `</div></div>`;
             });
         }
 
-        function getGeneratedURL() {
-            const jsonStr = btoa(unescape(encodeURIComponent(JSON.stringify(workoutData))));
-            const color = adminSettings.profColor.replace('#', '');
-            return `${window.location.origin}${window.location.pathname}?aluno=${jsonStr}&p=${encodeURIComponent(adminSettings.profName)}&c=${color}`;
+        function toggleCheck(el) {
+            el.classList.toggle('checked');
+            const dots = document.querySelectorAll('.serie-dot');
+            const checked = document.querySelectorAll('.serie-dot.checked');
+            const pct = (checked.length / dots.length) * 100;
+            document.getElementById('progressFill').style.width = pct + '%';
+            if(pct === 100) document.getElementById('finishArea').classList.remove('hidden');
         }
 
-        function sendWhatsApp() {
-            const url = getGeneratedURL();
-            const text = encodeURIComponent(`Olá ${workoutData.student}, aqui está seu treino: ${url}`);
-            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+        function renderLibrary() {
+            const container = document.getElementById('accordionLib');
+            container.innerHTML = Object.keys(exerciseLibrary).map(cat => `
+                <div class="border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden mb-2">
+                    <button onclick="this.nextElementSibling.classList.toggle('active')" class="w-full p-3 text-left bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase flex justify-between items-center">
+                        ${cat} <span>▼</span>
+                    </button>
+                    <div class="category-content p-2 space-y-1">
+                        ${exerciseLibrary[cat].map(ex => `<div onclick="addEx('${ex}', this)" class="p-2 text-[11px] hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer rounded-lg transition-all duration-200">${ex}</div>`).join('')}
+                    </div>
+                </div>`).join('');
         }
 
-        function generateLink() {
-            const url = getGeneratedURL();
-            navigator.clipboard.writeText(url);
-            alert("Link copiado com sucesso!");
+        function addEx(name, el) {
+            const day = document.getElementById('daySelector').value;
+            workoutData.days[day].push({ n: name, r: "3x12", w: "", obs: "", bi: false });
+            
+            // FEEDBACK VISUAL DE COR TEMPORÁRIO
+            if(el) {
+                el.classList.add('selected-flash');
+                setTimeout(() => el.classList.remove('selected-flash'), 500);
+            }
+
+            markUnsaved(); render(); saveDraft();
         }
 
-        function saveAdminData() {
-            adminSettings.profName = document.getElementById('profNameInput').value;
-            adminSettings.profPhone = document.getElementById('profPhoneInput').value.replace(/\D/g,'');
-            adminSettings.profColor = document.getElementById('profColorInput').value;
-            localStorage.setItem('jaque_admin_v5', JSON.stringify(adminSettings));
-            applyAdmin(); toggleAdmin();
+        function getFullURL() {
+            const json = JSON.stringify(workoutData);
+            const enc = btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (m, p) => String.fromCharCode('0x' + p)));
+            return `${window.location.origin}${window.location.pathname}?aluno=${enc}`;
         }
 
-        function applyAdmin() {
-            document.documentElement.style.setProperty('--primary-color', adminSettings.profColor);
-            document.getElementById('profHeaderPhoto').src = adminSettings.profPhoto;
-            if(adminSettings.profPhoto) document.getElementById('profHeaderPhoto').classList.remove('hidden');
-            document.getElementById('brandName').innerText = `PERSONAL ${adminSettings.profName.toUpperCase()}`;
-            document.getElementById('waLink').href = `https://wa.me/${adminSettings.profPhone}`;
-        }
-
-        function updateHeader() { workoutData.student = document.getElementById('studentName').value; save(); }
-        function save() { localStorage.setItem('jaque_workout_v5', JSON.stringify(workoutData)); }
-        function load() { const s = localStorage.getItem('jaque_workout_v5'); if(s) workoutData = JSON.parse(s); }
-        function toggleAdmin() { document.getElementById('adminModal').classList.toggle('active'); }
+        function saveDraft() { localStorage.setItem('jaque_draft_v2', JSON.stringify(workoutData)); }
+        function loadDraft() { const s = localStorage.getItem('jaque_draft_v2'); if(s) workoutData = JSON.parse(s); }
+        function markUnsaved() { isSaved = false; document.getElementById('saveStatus').innerText = "NÃO SALVO"; }
+        function markSaved() { isSaved = true; document.getElementById('saveStatus').innerText = "SALVO"; }
+        function checkAndExecute(cb) { if(!isSaved) { if(!confirm("O treino não foi salvo no histórico. Continuar mesmo assim?")) return; } cb(); }
+        function removeEx(d, i) { workoutData.days[d].splice(i, 1); render(); markUnsaved(); }
         function toggleTheme() { document.documentElement.classList.toggle('dark'); }
-        function clearWorkout() { if(confirm("Apagar treino?")) { localStorage.removeItem('jaque_workout_v5'); location.reload(); } }
+        function clearCurrentWork() { if(confirm("Limpar tela atual?")) { workoutData.days = { segunda: [], terca: [], quarta: [], quinta: [], sexta: [], sabado: [] }; render(); markUnsaved(); } }
+        
+        function saveToHistory() {
+            if(!workoutData.student) return alert("Digite o nome do aluno!");
+            let history = JSON.parse(localStorage.getItem('jaque_history_v2') || '[]');
+            history.unshift({ id: Date.now(), name: workoutData.student, date: new Date().toLocaleDateString(), data: JSON.parse(JSON.stringify(workoutData)) });
+            localStorage.setItem('jaque_history_v2', JSON.stringify(history));
+            markSaved(); renderHistory(); alert("Treino Salvo no Histórico!");
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            let history = JSON.parse(localStorage.getItem('jaque_history_v2') || '[]');
+            list.innerHTML = history.map(item => `
+                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-200">
+                    <div class="cursor-pointer flex-1" onclick="loadHistoryItem(${item.id})">
+                        <p class="text-[10px] font-bold uppercase text-pink-hot">${item.name}</p>
+                        <p class="text-[8px] opacity-50">${item.date}</p>
+                    </div>
+                    <button onclick="deleteHistoryItem(${item.id})" class="text-red-500 px-2">✕</button>
+                </div>`).join('');
+        }
+
+        function loadHistoryItem(id) {
+            let history = JSON.parse(localStorage.getItem('jaque_history_v2') || '[]');
+            const item = history.find(i => i.id === id);
+            if(item) { workoutData = JSON.parse(JSON.stringify(item.data)); applyConfigs(); render(); markSaved(); }
+        }
+
+        function deleteHistoryItem(id) {
+            let history = JSON.parse(localStorage.getItem('jaque_history_v2') || '[]');
+            localStorage.setItem('jaque_history_v2', JSON.stringify(history.filter(i => i.id !== id)));
+            renderHistory();
+        }
 
         window.onload = init;
     </script>
